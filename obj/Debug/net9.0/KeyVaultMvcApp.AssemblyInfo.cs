@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KeyVaultMvcApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f2fbcee9df10c7b6dc8044a7e2619fa04c5b97c")]
 [assembly: System.Reflection.AssemblyProductAttribute("KeyVaultMvcApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KeyVaultMvcApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

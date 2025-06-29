@@ -5,49 +5,37 @@ using KeyVaultMvcApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Configure Key Vault integration
+// Key Vault Configuration
 var keyVaultUrl = builder.Configuration["KeyVault:VaultUrl"];
 if (string.IsNullOrEmpty(keyVaultUrl))
 {
     throw new InvalidOperationException("Key Vault URL is not configured.");
 }
 
-// Initialize DbContext configuration
-string connectionString;
-
-try 
+try
 {
-    // Create Key Vault client
-    var client = new SecretClient(
-        new Uri(keyVaultUrl), 
-        new DefaultAzureCredential());
-
-    // Retrieve the secret
+    // This will use Managed Identity when deployed to Azure
+    var credential = new DefaultAzureCredential();
+    
+    var client = new SecretClient(new Uri(keyVaultUrl), credential);
     KeyVaultSecret secret = await client.GetSecretAsync("SQLConnectionString");
-    connectionString = secret?.Value;
-
-    if (string.IsNullOrEmpty(connectionString))
-    {
-        throw new InvalidOperationException("SQL connection string not found in Key Vault.");
-    }
+    string connectionString = secret.Value;
+    
+    builder.Services.AddDbContext<AppDbContext>(options => 
+        options.UseSqlServer(connectionString));
 }
 catch (Exception ex)
 {
-    // Fallback to local DB for development
-    connectionString = "Server=(localdb)\\mssqllocaldb;Database=KeyVaultMvcTempDb;Trusted_Connection=True;";
-    Console.WriteLine($"Key Vault access failed, using local DB: {ex.Message}");
+    // Will appear in Application Insights or App Service logs
+    Console.WriteLine($"Key Vault access failed: {ex.Message}"); 
+    throw;
 }
-
-// Configure DbContext
-builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
